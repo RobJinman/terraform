@@ -301,7 +301,7 @@ bool Player::grounded() const {
       Item* item = dynamic_cast<Item*>(vec[i]->getAuxDataPtr());
       assert(item);
 
-      if (item == dynamic_cast<Item*>(getAuxDataPtr())) continue;
+      if (vec[i].get() == static_cast<const Entity*>(this)) continue;
       if (!item->isSolid()) continue;
       if (!vec[i]->hasShape()) continue;
 
@@ -318,7 +318,7 @@ bool Player::grounded() const {
 void Player::jump() {
    static long jumpStr = internString("jump");
 
-   if (grounded() && m_jumpTimer.getTime() > 0.2) {
+   if (grounded() && m_jumpTimer.getTime() > 0.2 && fabs(getLinearVelocity().y) < 0.7f) {
       stopAnimation();
       playAnimation(jumpStr);
       applyLinearImpulse(Vec2f(0.0, 0.2), Vec2f(0.0, 0.0));
