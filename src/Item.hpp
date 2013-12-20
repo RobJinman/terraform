@@ -7,11 +7,10 @@
 #include <dodge/xml/xml.hpp>
 
 
-class Item : virtual public Dodge::Entity {
+class Item : public Dodge::IAuxData {
    public:
       Item(const Dodge::XmlNode data);
       Item(const Item& item);
-      Item(const Item& item, long name);
 
       virtual size_t getSize() const;
       virtual Item* clone() const;
@@ -22,15 +21,17 @@ class Item : virtual public Dodge::Entity {
       inline void setSolid(bool b);
       inline bool isSolid() const;
 
+      inline void setEntity(Dodge::Entity* entity);
+      inline Dodge::Entity* getEntity() const;
+
       // TODO: dbg_print
 
       virtual ~Item();
 
    private:
+      Dodge::Entity* m_entity;
       bool m_solid;
 };
-
-typedef boost::shared_ptr<Item> pItem_t;
 
 //===========================================
 // Item::setSolid
@@ -44,6 +45,20 @@ void Item::setSolid(bool b) {
 //===========================================
 bool Item::isSolid() const {
    return m_solid;
+}
+
+//===========================================
+// Item::setEntity
+//===========================================
+void Item::setEntity(Dodge::Entity* entity) {
+   m_entity = entity;
+}
+
+//===========================================
+// Item::getEntity
+//===========================================
+Dodge::Entity* Item::getEntity() const {
+   return m_entity;
 }
 
 

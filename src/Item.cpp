@@ -9,10 +9,7 @@ using namespace Dodge;
 //===========================================
 // Item::Item
 //===========================================
-Item::Item(const XmlNode data)
-   : Asset(internString("Item")),
-     Entity(data.firstChild()) {
-
+Item::Item(const XmlNode data) {
    try {
       XML_NODE_CHECK(data, Item);
 
@@ -29,14 +26,9 @@ Item::Item(const XmlNode data)
 //===========================================
 // Item::Item
 //===========================================
-Item::Item(const Item& item)
-   : Asset(internString("Item")), Entity(item) {}
-
-//===========================================
-// Item::Item
-//===========================================
-Item::Item(const Item& item, long name)
-   : Asset(internString("Item")), Entity(item, name) {}
+Item::Item(const Item& cpy) {
+   m_solid = cpy.m_solid;
+}
 
 //===========================================
 // Item::clone
@@ -49,16 +41,14 @@ Item* Item::clone() const {
 // Item::getSize
 //===========================================
 size_t Item::getSize() const {
-   return sizeof(Item)
-      - sizeof(Entity)
-      + Entity::getSize();
+   return sizeof(Item);
 }
 
 //===========================================
 // Item::setPendingDeletion
 //===========================================
 void Item::setPendingDeletion() {
-   EPendingDeletion* event = new EPendingDeletion(boost::dynamic_pointer_cast<Item>(getSharedPtr()));
+   EPendingDeletion* event = new EPendingDeletion(m_entity->getSharedPtr());
 
    EventManager eventManager;
    eventManager.queueEvent(event);
@@ -74,10 +64,6 @@ void Item::assignData(const XmlNode data) {
       XmlAttribute attr = data.firstAttribute();
       if (!attr.isNull() && attr.name() == "solid")
          m_solid = attr.getBool();
-
-      XmlNode node = data.firstChild();
-      if (!node.isNull() && node.name() == "Entity")
-         Entity::assignData(node);
    }
    catch (XmlException& e) {
       e.prepend("Error parsing XML for instance of class Item; ");

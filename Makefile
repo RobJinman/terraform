@@ -7,10 +7,6 @@ INCL = -I$(DODGE_LOCATION)/Dodge/include
 LIBS = -L$(DODGE_LOCATION)/Dodge/lib -L/usr/lib -lDodge -lX11 -lGL -lGLEW -lpnglite -lBox2D -lz `sdl-config --libs` -lSDLmain -lSDL -lSDL_mixer
 SRC = src
 OBJS = $(SRC)/Application.o \
-	$(SRC)/CParallaxSprite.o \
-	$(SRC)/CPhysicalEntity.o \
-	$(SRC)/CPhysicalSprite.o \
-	$(SRC)/CSprite.o \
 	$(SRC)/Item.o \
 	$(SRC)/main.o \
 	$(SRC)/Player.o \

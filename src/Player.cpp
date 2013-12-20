@@ -1,5 +1,6 @@
 #include <set>
 #include <dodge/StringId.hpp>
+#include "Item.hpp"
 #include "Player.hpp"
 
 
@@ -12,9 +13,8 @@ using namespace Dodge;
 //===========================================
 Player::Player(const XmlNode data)
    : Asset(internString("Player")),
-     Entity(data.firstChild().firstChild()),
-     Item(data.firstChild()),
-     PhysicalSprite<Box2dPhysics>(data.nthChild(1)),
+     Entity(data.firstChild().firstChild().firstChild()),
+     PhysicalSprite<Box2dPhysics>(data.firstChild()),
      m_mode(DIG_MODE),
      m_modeLocked(0) {
 
@@ -25,7 +25,7 @@ Player::Player(const XmlNode data)
    try {
       XML_NODE_CHECK(data, Player);
 
-      XmlNode node = data.nthChild(2);
+      XmlNode node = data.nthChild(1);
       XML_NODE_CHECK(node, speed);
       m_speed = node.getFloat();
 
@@ -71,7 +71,6 @@ Player::Player(const XmlNode data)
 Player::Player(const Player& copy, long name)
    : Asset(internString("Player")),
      Entity(copy, name),
-     Item(copy, name),
      PhysicalSprite<Box2dPhysics>(copy, name),
      m_mode(DIG_MODE),
      m_modeLocked(0) {
@@ -115,9 +114,7 @@ void Player::init() {
 //===========================================
 size_t Player::getSize() const {
    return sizeof(Player)
-      - sizeof(Item)
       - sizeof(PhysicalSprite<Box2dPhysics>)
-      + Item::getSize()
       + PhysicalSprite<Box2dPhysics>::getSize()
       - sizeof(Asset)
       - sizeof(Quad) + m_footSensor.getSize()
@@ -301,14 +298,14 @@ bool Player::grounded() const {
    m_worldSpace.getEntities(getBoundary(), vec);
 
    for (uint_t i = 0; i < vec.size(); ++i) {
-      pItem_t item = boost::dynamic_pointer_cast<Item>(vec[i]);
+      Item* item = dynamic_cast<Item*>(vec[i]->getAuxDataPtr());
       assert(item);
 
-      if (item.get() == this) continue;
+      if (item == dynamic_cast<Item*>(getAuxDataPtr())) continue;
       if (!item->isSolid()) continue;
-      if (!item->hasShape()) continue;
+      if (!vec[i]->hasShape()) continue;
 
-      if (Math::overlap(m_footSensor, getTranslation_abs(), item->getShape(), item->getTranslation_abs()))
+      if (Math::overlap(m_footSensor, getTranslation_abs(), vec[i]->getShape(), vec[i]->getTranslation_abs()))
          return true;
    }
 
@@ -545,11 +542,6 @@ void Player::assignData(const XmlNode data) {
       XML_NODE_CHECK(data, Player)
 
       XmlNode node = data.firstChild();
-      if (!node.isNull() && node.name() == "Item") {
-         Item::assignData(node);
-         node = node.nextSibling();
-      }
-
       if (!node.isNull() && node.name() == "PhysicalSprite") {
          PhysicalSprite<Box2dPhysics>::assignData(node);
          node = node.nextSibling();

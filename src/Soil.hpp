@@ -6,10 +6,9 @@
 #include <dodge/EEvent.hpp>
 #include <dodge/Sprite.hpp>
 #include "dodge/xml/xml.hpp"
-#include "Item.hpp"
 
 
-class Soil : public Item, public Dodge::Sprite {
+class Soil : public Dodge::Sprite {
    public:
       Soil(const Dodge::XmlNode data);
       Soil(const Soil& copy);

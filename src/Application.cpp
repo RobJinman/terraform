@@ -8,10 +8,7 @@
 #include "EPendingDeletion.hpp"
 #include "Application.hpp"
 #include "Soil.hpp"
-#include "CSprite.hpp"
-#include "CParallaxSprite.hpp"
-#include "CPhysicalEntity.hpp"
-#include "CPhysicalSprite.hpp"
+#include "Item.hpp"
 
 
 #define TARGET_MEM_USAGE 115000
@@ -50,7 +47,7 @@ void Application::exitDefault() {
 void Application::quit() {
    m_renderer.stop();
 
-   m_items.clear();
+   m_entities.clear();
    m_eventManager.clear();
    m_worldSpace.removeAll();
    m_mapLoader.freeAllAssets();
@@ -209,10 +206,10 @@ void Application::deletePending(EEvent* event) {
    if (event->getType() == pendingDeletionStr) {
       EPendingDeletion* e = static_cast<EPendingDeletion*>(event);
 
-      m_worldSpace.removeAndUntrackEntity(e->item);
-      e->item->removeFromWorld();
-      m_items.erase(e->item->getName());
-      m_assetManager.freeAsset(e->item->getAssetId());
+      m_worldSpace.removeAndUntrackEntity(e->entity);
+      e->entity->removeFromWorld();
+      m_entities.erase(e->entity->getName());
+      m_assetManager.freeAsset(e->entity->getAssetId());
    }
 }
 
@@ -225,7 +222,7 @@ void Application::deleteAsset(pAsset_t asset) {
    if (entity) {
       m_worldSpace.removeAndUntrackEntity(entity);
       entity->removeFromWorld();
-      m_items.erase(entity->getName());
+      m_entities.erase(entity->getName());
    }
 
    m_assetManager.freeAsset(asset->getAssetId());
@@ -253,46 +250,105 @@ pAsset_t Application::constructAsset(const XmlNode data) {
    XmlNode node = data.firstChild();
 
 
-   // Construct non-Item assets
+   // Construct non-Entity assets
 
    if (node.name() == "Texture") return pAsset_t(new Texture(node));
    // ...
 
 
-   // Construct Items
+   // Construct Entities
 
-   pItem_t item;
+   pEntity_t entity;
+
+   // Does the XML description reference a prototype?
    if (proto != -1) {
-      item = pItem_t(dynamic_cast<Item*>(m_assetManager.cloneAsset(proto)));
-      item->assignData(node);
-   }
-   else {
-      if (node.name() == "Player") item = pItem_t(new Player(node));
-      if (node.name() == "Soil") item = pItem_t(new Soil(node));
-      if (node.name() == "Item") item = pItem_t(new Item(node));
-      if (node.name() == "CParallaxSprite") item = pItem_t(new CParallaxSprite(node));
-      if (node.name() == "CSprite") item = pItem_t(new CSprite(node));
-      if (node.name() == "CPhysicalEntity") item = pItem_t(new CPhysicalEntity(node));
-      if (node.name() == "CPhysicalSprite") item = pItem_t(new CPhysicalSprite(node));
-   }
+      entity = pEntity_t(dynamic_cast<Entity*>(m_assetManager.cloneAsset(proto)));
 
-   if (!item)
-      throw Exception("Unrecognised item type", __FILE__, __LINE__);
+      if (!entity)
+         throw Exception("Prototype not found", __FILE__, __LINE__);
+
+      // If the prototype has an Item object (aux data), set it to point at the entity.
+      IAuxData* p = entity->getAuxDataPtr();
+      if (p) {
+         Item* item = dynamic_cast<Item*>(p);
+         assert(item);
+
+         item->setEntity(entity.get());
+      }
+
+      // If this XML node contains the entity along with an Item
+      bool hasAuxData = false;
+      if (node.name() == "ExtEntity") {
+         node = node.firstChild();
+         hasAuxData = true;
+      }
+
+      // The Entity node comes before the Item node
+      entity->assignData(node);
+
+      // Now we construct the Item
+      if (hasAuxData) {
+         node = node.nextSibling();
+
+         if (node.name() != "Item")
+            throw Exception("Expected Item node", __FILE__, __LINE__);
+
+         Item* item = new Item(node);
+         item->setEntity(entity.get());
+
+         entity->attachAuxData(unique_ptr<Item>(item));
+      }
+   }
+   // If XML description does not reference a prototype
+   else {
+      bool hasAuxData = false;
+      if (node.name() == "ExtEntity") {
+         node = node.firstChild();
+         hasAuxData = true;
+      }
+
+      if (node.name() == "Player") entity = pEntity_t(new Player(node));
+      if (node.name() == "Soil") entity = pEntity_t(new Soil(node));
+      if (node.name() == "ParallaxSprite") entity = pEntity_t(new ParallaxSprite(node));
+      if (node.name() == "Entity") entity = pEntity_t(new Entity(node));
+      if (node.name() == "Sprite") entity = pEntity_t(new Sprite(node));
+      if (node.name() == "PhysicalEntity") entity = pEntity_t(new PhysicalEntity<Box2dPhysics>(node));
+      if (node.name() == "PhysicalSprite") entity = pEntity_t(new PhysicalSprite<Box2dPhysics>(node));
+
+      if (!entity) {
+         Exception ex("Unrecognised entity type '", __FILE__, __LINE__);
+         ex.append(node.name());
+         ex.append("'");
+         throw ex;
+      }
+
+      if (hasAuxData) {
+         node = node.nextSibling();
+
+         if (node.name() != "Item")
+            throw Exception("Expected Item node", __FILE__, __LINE__);
+
+         Item* item = new Item(node);
+         item->setEntity(entity.get());
+
+         entity->attachAuxData(unique_ptr<Item>(item));
+      }
+   }
 
    if (addToWorld) {
-      item->addToWorld();
-      m_worldSpace.insertAndTrackEntity(item);
-      m_items[item->getName()] = item;
+      entity->addToWorld();
+      m_worldSpace.insertAndTrackEntity(entity);
+      m_entities[entity->getName()] = entity;
    }
 
-   return item;
+   return entity;
 }
 
 //===========================================
 // Application::update
 //===========================================
 void Application::update() {
-   for (map<long, pItem_t>::iterator i = m_items.begin(); i != m_items.end(); ++i)
+   for (auto i = m_entities.begin(); i != m_entities.end(); ++i)
       i->second->update();
 
    m_player->update();
@@ -403,10 +459,10 @@ void Application::begin(int argc, char** argv) {
 
    m_mapLoader.update(camera->getTranslation());
 
-   for (auto i = m_items.begin(); i != m_items.end(); ++i) {
+   for (auto i = m_entities.begin(); i != m_entities.end(); ++i) {
       if (i->first == internString("player")) {
-         m_player = boost::static_pointer_cast<Player>(i->second);
-         m_items.erase(i);
+         m_player = boost::dynamic_pointer_cast<Player>(i->second);
+         m_entities.erase(i);
          break;
       }
    }

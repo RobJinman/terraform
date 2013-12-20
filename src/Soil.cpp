@@ -1,5 +1,6 @@
 #include <dodge/StringId.hpp>
 #include <dodge/EAnimFinished.hpp>
+#include "Item.hpp"
 #include "Soil.hpp"
 
 
@@ -12,8 +13,7 @@ using namespace Dodge;
 Soil::Soil(const XmlNode data)
    : Asset(internString("Soil")),
      Entity(data.firstChild().firstChild()),
-     Item(data.firstChild()),
-     Sprite(data.nthChild(1)) {
+     Sprite(data.firstChild()) {
 
    try {
       XML_NODE_CHECK(data, Soil);
@@ -29,7 +29,6 @@ Soil::Soil(const XmlNode data)
 Soil::Soil(const Soil& copy)
    : Asset(internString("Soil")),
      Entity(copy),
-     Item(copy),
      Sprite(copy) {}
 
 //===========================================
@@ -38,7 +37,6 @@ Soil::Soil(const Soil& copy)
 Soil::Soil(const Soil& copy, long name)
    : Asset(internString("Soil")),
      Entity(copy, name),
-     Item(copy, name),
      Sprite(copy, name) {}
 
 //===========================================
@@ -46,9 +44,7 @@ Soil::Soil(const Soil& copy, long name)
 //===========================================
 size_t Soil::getSize() const {
    return sizeof(Soil)
-      - sizeof(Item)
       - sizeof(Sprite)
-      + Item::getSize()
       + Sprite::getSize();
 }
 
@@ -96,8 +92,12 @@ void Soil::onEvent(const EEvent* event) {
    else if (event->getType() == animFinishedStr) {
       const EAnimFinished* e = static_cast<const EAnimFinished*>(event);
 
-      if (e->animation->getName() == dissolveStr)
-         setPendingDeletion();
+      if (e->animation->getName() == dissolveStr) {
+         Item* item = dynamic_cast<Item*>(getAuxDataPtr());
+         assert(item);
+
+         item->setPendingDeletion();
+      }
    }
 }
 
@@ -123,11 +123,6 @@ void Soil::assignData(const XmlNode data) {
       XML_NODE_CHECK(data, Soil)
 
       XmlNode node = data.firstChild();
-      if (!node.isNull() && node.name() == "Item") {
-         Item::assignData(node);
-         node = node.nextSibling();
-      }
-
       if (!node.isNull() && node.name() == "Sprite") {
          Sprite::assignData(node);
       }

@@ -40,27 +40,27 @@ class Application {
 
       Functor<void, TYPELIST_0()> m_onExit;
 
-      Dodge::Renderer&           m_renderer;
-      int                        m_currentMap;
-      std::map<int, bool>        m_keyState;
-      std::vector<int>           m_dirKeyStack;
-      Dodge::WinIO               m_win;
-      Dodge::EventManager        m_eventManager;
-      Dodge::Range               m_viewArea;
-      Dodge::float32_t           m_zoomLevel;
+      Dodge::Renderer&                    m_renderer;
+      int                                 m_currentMap;
+      std::map<int, bool>                 m_keyState;
+      std::vector<int>                    m_dirKeyStack;
+      Dodge::WinIO                        m_win;
+      Dodge::EventManager                 m_eventManager;
+      Dodge::Range                        m_viewArea;
+      Dodge::float32_t                    m_zoomLevel;
 #ifdef DEBUG
-      bool                       dbg_worldSpaceVisible;
+      bool                                dbg_worldSpaceVisible;
 #endif
-      pPlayer_t                  m_player;
-      double                     m_frameRate;
+      pPlayer_t                           m_player;
+      double                              m_frameRate;
 
-      Dodge::AssetManager        m_assetManager;
-      Dodge::WorldSpace          m_worldSpace;
-      std::map<long, pItem_t>    m_items;
+      Dodge::AssetManager                 m_assetManager;
+      Dodge::WorldSpace                   m_worldSpace;
+      std::map<long, Dodge::pEntity_t>    m_entities;
 
-      Dodge::Colour              m_bgColour;
+      Dodge::Colour                       m_bgColour;
 
-      Dodge::MapLoader&          m_mapLoader;
+      Dodge::MapLoader&                   m_mapLoader;
 };
 
 

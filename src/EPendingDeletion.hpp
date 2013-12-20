@@ -3,16 +3,15 @@
 
 
 #include <boost/shared_ptr.hpp>
-#include <dodge/EEvent.hpp>
-#include "Item.hpp"
+#include <dodge/Entity.hpp>
 
 
 class EPendingDeletion : public Dodge::EEvent {
    public:
-      EPendingDeletion(pItem_t item_)
-         : EEvent(Dodge::internString("pendingDeletion")), item(item_) {}
+      EPendingDeletion(Dodge::pEntity_t ent)
+         : EEvent(Dodge::internString("pendingDeletion")), entity(ent) {}
 
-      pItem_t item;
+      Dodge::pEntity_t entity;
 };
 
 

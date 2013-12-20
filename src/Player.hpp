@@ -9,10 +9,9 @@
 #include <dodge/PhysicalSprite.hpp>
 #include <dodge/math/math.hpp>
 #include <dodge/Timer.hpp>
-#include "Item.hpp"
 
 
-class Player : public Item, public Dodge::PhysicalSprite<Dodge::Box2dPhysics> {
+class Player : public Dodge::PhysicalSprite<Dodge::Box2dPhysics> {
    public:
       typedef enum { DIG_MODE, PLATFORM_MODE } mode_t;
       typedef enum { LEFT, RIGHT, UP, DOWN } dir_t;
