@@ -9,6 +9,7 @@ SRC = src
 OBJS = $(SRC)/Application.o \
 	$(SRC)/Item.o \
 	$(SRC)/main.o \
+	$(SRC)/Platform.o \
 	$(SRC)/Player.o \
 	$(SRC)/Soil.o
 

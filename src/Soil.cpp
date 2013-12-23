@@ -56,20 +56,6 @@ Soil* Soil::clone() const {
 }
 
 //===========================================
-// Soil::addToWorld
-//===========================================
-void Soil::addToWorld() {
-   Sprite::addToWorld();
-}
-
-//===========================================
-// Soil::removeFromWorld
-//===========================================
-void Soil::removeFromWorld() {
-   Sprite::removeFromWorld();
-}
-
-//===========================================
 // Soil::onEvent
 //===========================================
 void Soil::onEvent(const EEvent* event) {
@@ -99,20 +85,6 @@ void Soil::onEvent(const EEvent* event) {
          item->setPendingDeletion();
       }
    }
-}
-
-//===========================================
-// Soil::update
-//===========================================
-void Soil::update() {
-   Sprite::update();
-}
-
-//===========================================
-// Soil::draw
-//===========================================
-void Soil::draw() const {
-   Sprite::draw();
 }
 
 //===========================================

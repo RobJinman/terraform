@@ -28,9 +28,6 @@ class Player : public Dodge::PhysicalSprite<Dodge::Box2dPhysics> {
       inline mode_t getMode() const;
       inline dir_t facingDir() const;
 
-      virtual void addToWorld();
-      virtual void removeFromWorld();
-
       virtual size_t getSize() const;
       virtual Player* clone() const;
       virtual void assignData(const Dodge::XmlNode data);

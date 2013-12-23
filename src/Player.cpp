@@ -168,20 +168,6 @@ void Player::snapToGridV(float32_t offset) {
 }
 
 //===========================================
-// Player::addToWorld
-//===========================================
-void Player::addToWorld() {
-   PhysicalSprite<Box2dPhysics>::addToWorld();
-}
-
-//===========================================
-// Player::removeFromWorld
-//===========================================
-void Player::removeFromWorld() {
-   PhysicalSprite<Box2dPhysics>::removeFromWorld();
-}
-
-//===========================================
 // Player::onEvent
 //===========================================
 void Player::onEvent(const EEvent* event) {
@@ -299,7 +285,7 @@ bool Player::grounded() const {
 
    for (uint_t i = 0; i < vec.size(); ++i) {
       Item* item = dynamic_cast<Item*>(vec[i]->getAuxDataPtr());
-      assert(item);
+      if (!item) continue;
 
       if (vec[i].get() == static_cast<const Entity*>(this)) continue;
       if (!item->isSolid()) continue;

@@ -24,6 +24,7 @@ class Application {
       void quit();
       void keyDown(int key);
       void keyUp(int key);
+      void leftClick(int x, int y);
       void keyboard();
       void onWindowResize(int w, int h);
       void deletePending(Dodge::EEvent* event);

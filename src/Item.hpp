@@ -9,6 +9,7 @@
 
 class Item : public Dodge::IAuxData {
    public:
+      Item() : m_entity(NULL), m_solid(true) {}
       Item(const Dodge::XmlNode data);
       Item(const Item& item);
 

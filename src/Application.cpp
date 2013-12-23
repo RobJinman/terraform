@@ -9,6 +9,7 @@
 #include "Application.hpp"
 #include "Soil.hpp"
 #include "Item.hpp"
+#include "Platform.hpp"
 
 
 #define TARGET_MEM_USAGE 115000
@@ -116,6 +117,36 @@ void Application::keyUp(int key) {
          --i;
       }
    }
+}
+
+//===========================================
+// Application::leftClick
+//===========================================
+void Application::leftClick(int x, int y) {
+   y = m_win.getWindowHeight() - y;
+
+   Vec2f viewPos = m_renderer.getCamera().getTranslation();
+
+   // World coords
+   float32_t wx = viewPos.x + static_cast<float32_t>(x) * gGetPixelSize().x;
+   float32_t wy = viewPos.y + static_cast<float32_t>(y) * gGetPixelSize().y;
+
+   Shape* shape = new Quad(Vec2f(0.05, 0.05));
+
+   pEntity_t ent(new PhysicalEntity<Box2dPhysics>(internString("block"), unique_ptr<Shape>(shape), EntityPhysics::options_t(true, false, 1.0, 0.3)));
+   ent->setFillColour(Colour(0.0, 0.0, 1.0, 1.0));
+   ent->setTranslation(wx, wy);
+   ent->setZ(9);
+
+   Item* item = new Item;
+   item->setSolid(true);
+   item->setEntity(ent.get());
+   ent->attachAuxData(unique_ptr<IAuxData>(item));
+
+   ent->addToWorld();
+   m_worldSpace.trackEntity(ent);
+
+   m_entities[ent->getName()] = ent;
 }
 
 //===========================================
@@ -308,6 +339,7 @@ pAsset_t Application::constructAsset(const XmlNode data) {
       }
 
       if (node.name() == "Player") entity = pEntity_t(new Player(node));
+      if (node.name() == "Platform") entity = pEntity_t(new Platform(node));
       if (node.name() == "Soil") entity = pEntity_t(new Soil(node));
       if (node.name() == "ParallaxSprite") entity = pEntity_t(new ParallaxSprite(node));
       if (node.name() == "Entity") entity = pEntity_t(new Entity(node));
@@ -432,6 +464,7 @@ void Application::begin(int argc, char** argv) {
    m_win.registerCallback(WinIO::EVENT_WINCLOSE, Functor<void, TYPELIST_0()>(this, &Application::quit));
    m_win.registerCallback(WinIO::EVENT_KEYDOWN, Functor<void, TYPELIST_1(int)>(this, &Application::keyDown));
    m_win.registerCallback(WinIO::EVENT_KEYUP, Functor<void, TYPELIST_1(int)>(this, &Application::keyUp));
+   m_win.registerCallback(WinIO::EVENT_BTN1PRESS, Functor<void, TYPELIST_2(int, int)>(this, &Application::leftClick));
    m_win.registerCallback(WinIO::EVENT_WINRESIZE, Functor<void, TYPELIST_2(int, int)>(this, &Application::onWindowResize));
 
    m_mapLoader.initialise(Functor<void, TYPELIST_1(const Dodge::XmlNode)>(this, &Application::setMapSettings),
@@ -475,8 +508,8 @@ void Application::begin(int argc, char** argv) {
       computeFrameRate();
       m_win.doEvents();
       keyboard();
-      update();
       Box2dPhysics::step();
+      update();
       m_eventManager.doEvents();
       draw();
       m_renderer.tick(m_bgColour);

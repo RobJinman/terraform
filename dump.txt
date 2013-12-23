@@ -1,0 +1,21 @@
+==8129== Memcheck, a memory error detector
+==8129== Copyright (C) 2002-2012, and GNU GPL'd, by Julian Seward et al.
+==8129== Using Valgrind-3.8.1 and LibVEX; rerun with -h for copyright info
+==8129== Command: ./terraform
+==8129== Parent PID: 5251
+==8129== 
+==8129== 
+==8129== HEAP SUMMARY:
+==8129==     in use at exit: 24,838,616 bytes in 6,772 blocks
+==8129==   total heap usage: 1,979,170 allocs, 1,972,398 frees, 145,469,152 bytes allocated
+==8129== 
+==8129== LEAK SUMMARY:
+==8129==    definitely lost: 9,064 bytes in 19 blocks
+==8129==    indirectly lost: 20,056 bytes in 354 blocks
+==8129==      possibly lost: 23,430,441 bytes in 5,284 blocks
+==8129==    still reachable: 1,379,055 bytes in 1,115 blocks
+==8129==         suppressed: 0 bytes in 0 blocks
+==8129== Rerun with --leak-check=full to see details of leaked memory
+==8129== 
+==8129== For counts of detected and suppressed errors, rerun with: -v
+==8129== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

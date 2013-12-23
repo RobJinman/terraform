@@ -14,13 +14,8 @@ class Soil : public Dodge::Sprite {
       Soil(const Soil& copy);
       Soil(const Soil& copy, long name);
 
-      virtual void draw() const;
-      virtual void update();
-
       virtual size_t getSize() const;
       virtual Soil* clone() const;
-      virtual void addToWorld();
-      virtual void removeFromWorld();
 
       virtual void onEvent(const Dodge::EEvent* event);
       virtual void assignData(const Dodge::XmlNode data);
