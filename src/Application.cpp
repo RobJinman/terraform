@@ -19,6 +19,10 @@ using namespace std;
 using namespace Dodge;
 
 
+const int WINDOW_WIDTH = 640;
+const int WINDOW_HEIGHT = 480;
+
+
 //===========================================
 // Application::Application
 //===========================================
@@ -269,7 +273,7 @@ pAsset_t Application::constructAsset(const XmlNode data) {
    XmlAttribute attr = data.firstAttribute();
    attr = attr.nextAttribute();
 
-   if (!attr.isNull() && attr.name() == "proto") {
+   if (!attr.isNull() && attr.name() == "protoId") {
       proto = attr.getLong();
       attr = attr.nextAttribute();
    }
@@ -459,7 +463,7 @@ void Application::begin(int argc, char** argv) {
       }
    }
 #endif
-   m_win.init("Terraform", 640, 480, false);
+   m_win.init("Terraform", WINDOW_WIDTH, WINDOW_HEIGHT, false);
 
    m_win.registerCallback(WinIO::EVENT_WINCLOSE, Functor<void, TYPELIST_0()>(this, &Application::quit));
    m_win.registerCallback(WinIO::EVENT_KEYDOWN, Functor<void, TYPELIST_1(int)>(this, &Application::keyDown));
@@ -481,14 +485,14 @@ void Application::begin(int argc, char** argv) {
       Functor<void, TYPELIST_1(EEvent*)>(this, &Application::deletePending));
 
    m_zoomLevel = 1.0;
-   pCamera_t camera(new Camera(640.0 / 480.0, 1.f));
+   pCamera_t camera(new Camera(static_cast<float32_t>(WINDOW_WIDTH) / static_cast<float32_t>(WINDOW_HEIGHT), 1.f));
    m_renderer.attachCamera(camera);
 
    Box2dPhysics::loadSettings("data/physics.conf");
 
    stringstream str;
-   str << "data/xml/map" << m_currentMap << ".xml";
-   m_mapLoader.parseMapFile(str.str());
+   str << "map" << m_currentMap << ".xml";
+   m_mapLoader.parseMapFile("./data/xml", str.str());
 
    m_mapLoader.update(camera->getTranslation());
 

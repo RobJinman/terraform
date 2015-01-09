@@ -1,0 +1,3 @@
+avconv -i ./video.mp4 -vf scale=320:-1 frames/frame%03d.png
+for i in $(seq 1 2 1289); do convert -dither None $(printf "frames/frame%03d.png frames/frame%03d.gif" $i $i); done;
+gifsicle --delay=10 --loop --colors 24 --method blend-diversity -O3 `seq -f frames/frame%03g.gif 1 2 1289` > output.gif
